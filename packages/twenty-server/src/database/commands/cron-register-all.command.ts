@@ -1,3 +1,4 @@
+import { LessBusyStockExpiryCronCommand } from 'src/modules/lessbusy/commands/lessbusy-stock-expiry.cron.command';
 import { Logger } from '@nestjs/common';
 
 import { Command, CommandRunner } from 'nest-commander';
@@ -47,6 +48,7 @@ export class CronRegisterAllCommand extends CommandRunner {
   private readonly logger = new Logger(CronRegisterAllCommand.name);
 
   constructor(
+    private readonly lessBusyStockExpiryCronCommand: LessBusyStockExpiryCronCommand,
     private readonly messagingMessagesImportCronCommand: MessagingMessagesImportCronCommand,
     private readonly messagingMessageListFetchCronCommand: MessagingMessageListFetchCronCommand,
     private readonly messagingOngoingStaleCronCommand: MessagingOngoingStaleCronCommand,
@@ -105,6 +107,7 @@ export class CronRegisterAllCommand extends CommandRunner {
     const isBillingEnabled = this.twentyConfigService.get('IS_BILLING_ENABLED');
 
     const allCommands = [
+      ...(this.twentyConfigService.get('LESSBUSY_STOCK_EXPIRY_ENABLED') ? [{ name: 'LessBusyStockExpiry', command: this.lessBusyStockExpiryCronCommand }] : []),
       {
         name: 'MessagingMessagesImport',
         command: this.messagingMessagesImportCronCommand,

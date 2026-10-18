@@ -1,4 +1,6 @@
+import { LessBusyRecordActions } from '@/lessbusy/components/LessBusyRecordActions';
 import { RecordIndexCommandMenu } from '@/command-menu-item/components/RecordIndexCommandMenu';
+import { getLessBusyObjectPresentation } from '@/lessbusy/utils/getLessBusyObjectPresentation';
 import { contextStoreCurrentViewIdComponentState } from '@/context-store/states/contextStoreCurrentViewIdComponentState';
 import { contextStoreNumberOfSelectedRecordsComponentState } from '@/context-store/states/contextStoreNumberOfSelectedRecordsComponentState';
 import { isLayoutCustomizationModeEnabledState } from '@/layout-customization/states/isLayoutCustomizationModeEnabledState';
@@ -29,7 +31,7 @@ export const RecordIndexPageHeader = () => {
   const objectMetadataItem =
     findObjectMetadataItemByNamePlural(objectNamePlural);
 
-  const label = objectMetadataItem?.labelPlural ?? objectNamePlural;
+  const label = objectMetadataItem ? getLessBusyObjectPresentation(objectMetadataItem).plural : objectNamePlural;
 
   const contextStoreCurrentViewId = useAtomComponentStateValue(
     contextStoreCurrentViewIdComponentState,
@@ -54,6 +56,7 @@ export const RecordIndexPageHeader = () => {
         actionButton={
           isDefined(contextStoreCurrentViewId) ? (
             <>
+              {workspaceSurface.type === 'main' && objectMetadataItem && <LessBusyRecordActions objectNameSingular={objectMetadataItem.nameSingular} />}
               <RecordIndexCommandMenu />
               {!isLayoutCustomizationModeEnabled &&
                 workspaceSurface.type === 'main' && <SidePanelToggleButton />}

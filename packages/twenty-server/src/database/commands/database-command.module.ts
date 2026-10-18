@@ -1,3 +1,4 @@
+import { LessBusyModule } from 'src/modules/lessbusy/lessbusy.module';
 import { AgentHistoryMigrationModule } from 'src/database/commands/agent-history/agent-history-migration.module';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -64,6 +65,7 @@ import { AutomatedTriggerModule } from 'src/modules/workflow/workflow-trigger/au
 
 @Module({
   imports: [
+    LessBusyModule,
     AgentHistoryMigrationModule,
     AiAgentTriggerModule,
     UpgradeVersionCommandModule,

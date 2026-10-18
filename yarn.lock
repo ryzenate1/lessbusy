@@ -50886,6 +50886,7 @@ __metadata:
     "@testing-library/dom": "npm:^10.4.0"
     "@testing-library/jest-dom": "npm:^6.6.3"
     "@testing-library/react": "npm:^16.3.0"
+    "@testing-library/user-event": "npm:^14.6.1"
     "@tiptap/core": "npm:3.30.5"
     "@tiptap/extension-bold": "npm:3.30.5"
     "@tiptap/extension-collaboration": "npm:3.30.5"

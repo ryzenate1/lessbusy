@@ -1,0 +1,100 @@
+import { LessBusyCatalogueExport } from '@/lessbusy/components/LessBusyCatalogueExport';
+import { LessBusyDefaultCurrency } from '@/lessbusy/components/LessBusyDefaultCurrency';
+import { LessBusyCatalogueImport } from '@/lessbusy/components/LessBusyCatalogueImport';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { t } from '@lingui/core/macro';
+import { z } from 'zod';
+import { escapeForIlike } from 'twenty-shared/utils';
+import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
+import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
+import { useFindManyRecords } from '@/object-record/hooks/useFindManyRecords';
+import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
+import { useLessBusyApi } from '@/lessbusy/hooks/useLessBusyApi';
+import { useLessBusyObjectAccess } from '@/lessbusy/hooks/useLessBusyObjectAccess';
+import { moneyToMinorUnits } from '@/lessbusy/utils/moneyToMinorUnits';
+import { formatLessBusyMoney } from '@/lessbusy/utils/formatLessBusyMoney';
+import { LessBusyObjectGate } from '@/lessbusy/components/LessBusyObjectGate';
+import { LessBusyForm } from '@/lessbusy/components/LessBusyForm';
+import { LessBusyActions, LessBusyContent, LessBusyDescription, LessBusyLink, LessBusyRetry, LessBusySection, LessBusyTaskList } from '@/lessbusy/components/LessBusyStyles';
+import { PageCardLayout } from '@/ui/layout/page/components/PageCardLayout';
+import { PageCardHeader } from '@/ui/layout/page/components/PageCardHeader';
+
+const variantSchema = z.object({ id: z.string().uuid(), sku: z.string(), attributes: z.record(z.string(), z.string()), unitAmountMinor: z.string(), costAmountMinor: z.string().nullable(), taxBasisPoints: z.number().nullable(), lowStockThresholdUnits: z.number().nullable(), barcode: z.string().nullable(), status: z.string().nullable(), tracksInventory: z.boolean().nullable() });
+const productSchema = z.object({ id: z.string().uuid(), name: z.string(), description: z.string().nullable(), category: z.string().nullable(), isService: z.boolean().nullable(), status: z.string().nullable(), currency: z.string(), version: z.number(), attributes: z.record(z.string(), z.array(z.string())).nullable(), images: z.array(z.object({ url: z.string(), alt: z.string() })).nullable(), variants: z.array(variantSchema), auditEvents: z.array(z.object({ action: z.string(), at: z.string() })).nullable() });
+type Product = z.infer<typeof productSchema>;
+type VariantDraft = { key: string; id?: string; sku: string; attributes: Record<string, string>; price: string; cost: string; tax: string; threshold: string; barcode: string; status: string; tracksInventory: boolean };
+const newVariant = (): VariantDraft => ({ key: crypto.randomUUID(), sku: '', attributes: {}, price: '', cost: '', tax: '0', threshold: '0', barcode: '', status: 'ACTIVE', tracksInventory: true });
+const decimalAmount = (minor: string, currency: string) => formatLessBusyMoney(minor, currency).slice(currency.length + 1);
+
+const ProductEditor = ({ product, onSaved, onCancel, defaultCurrency }: { product?: Product; defaultCurrency?: string; onSaved: (id: string) => Promise<void>; onCancel: () => void }) => {
+  const { request, pending, error } = useLessBusyApi();
+  const [name, setName] = useState(product?.name ?? '');
+  const [description, setDescription] = useState(product?.description ?? '');
+  const [category, setCategory] = useState(product?.category ?? '');
+  const [currency, setCurrency] = useState(product?.currency ?? defaultCurrency ?? '');
+  const [status, setStatus] = useState(product?.status ?? 'DRAFT');
+  const [isService, setIsService] = useState(product?.isService ?? false);
+  const [attributeDefinitions, setAttributeDefinitions] = useState<Array<{ key: string; name: string; values: string }>>(() => Object.entries(product?.attributes ?? {}).map(([name, values]) => ({ key: crypto.randomUUID(), name, values: values.join(', ') })));
+  const [images, setImages] = useState((product?.images ?? []).map((image) => image.url).join('\n'));
+  const [variants, setVariants] = useState<VariantDraft[]>(() => product ? product.variants.map((variant) => ({ key: variant.id, id: variant.id, sku: variant.sku, attributes: variant.attributes, price: decimalAmount(variant.unitAmountMinor, product.currency), cost: variant.costAmountMinor ? decimalAmount(variant.costAmountMinor, product.currency) : '', tax: String((variant.taxBasisPoints ?? 0) / 100), threshold: String(variant.lowStockThresholdUnits ?? 0), barcode: variant.barcode ?? '', status: variant.status ?? 'ACTIVE', tracksInventory: variant.tracksInventory ?? !product.isService })) : [newVariant()]);
+  const [confirmed, setConfirmed] = useState(false);
+  const [validation, setValidation] = useState<string | null>(null);
+  const operation = useRef<{ payload: string; key: string } | null>(null);
+  const updateVariant = (key: string, change: Partial<VariantDraft>) => { setVariants((previous) => previous.map((variant) => variant.key === key ? { ...variant, ...change } : variant)); setConfirmed(false); };
+  return <LessBusyForm onChange={() => setConfirmed(false)} onSubmit={async (event) => {
+    event.preventDefault(); if (pending || !confirmed) return;
+    setValidation(null);
+    try {
+      const names = attributeDefinitions.map((definition) => definition.name.trim());
+      if (new Set(names.map((value) => value.toLowerCase())).size !== names.length || names.some((value) => !value)) throw new Error(t`Give each attribute a distinct name.`);
+      const parsedAttributes = Object.fromEntries(attributeDefinitions.map((definition) => [definition.name.trim(), definition.values.split(',').map((value) => value.trim()).filter(Boolean)]));
+      const input = { name, description, category, currency, status, isService, attributes: parsedAttributes, images: images.split('\n').map((url) => url.trim()).filter(Boolean).map((url) => ({ url, alt: name })), variants: variants.map((variant) => ({ ...(variant.id ? { id: variant.id } : {}), sku: variant.sku, attributes: Object.fromEntries(Object.keys(parsedAttributes).map((name) => [name, variant.attributes[name] ?? ''])), unitAmountMinor: moneyToMinorUnits(variant.price, currency), costAmountMinor: variant.cost ? moneyToMinorUnits(variant.cost, currency) : null, taxBasisPoints: Number(moneyToMinorUnits(variant.tax, 'USD')), lowStockThresholdUnits: Number(variant.threshold), barcode: variant.barcode, status: variant.status, tracksInventory: variant.tracksInventory })) };
+      const payload = JSON.stringify(input);
+      if (operation.current?.payload !== payload) operation.current = { payload, key: crypto.randomUUID() };
+      const result = z.object({ id: z.string().uuid() }).parse(await request(product ? `products/${product.id}` : 'products', product ? 'PUT' : 'POST', { product: input, expectedVersion: product?.version ?? null, confirmed: true, operationKey: operation.current.key }));
+      await onSaved(result.id);
+    } catch (failure) { setValidation(failure instanceof Error ? failure.message : t`Could not save this product.`); }
+  }}><h1>{product ? t`Edit product or service` : t`Add a product or service`}</h1>
+    <label>{t`Name`}<input required maxLength={250} value={name} onChange={(event) => setName(event.target.value)} /></label><label>{t`Description`}<textarea maxLength={10000} value={description} onChange={(event) => setDescription(event.target.value)} /></label>
+    <div data-row><label>{t`Category`}<input maxLength={250} value={category} onChange={(event) => setCategory(event.target.value)} /></label><label>{t`Currency`}<input required maxLength={3} value={currency} onChange={(event) => setCurrency(event.target.value.toUpperCase())} placeholder="INR, USD, EUR" /></label><label>{t`Status`}<select value={status} onChange={(event) => setStatus(event.target.value)}><option value="DRAFT">{t`Draft`}</option><option value="ACTIVE">{t`Active`}</option><option value="ARCHIVED">{t`Archived`}</option></select></label></div>
+    <label data-confirmation><input type="checkbox" checked={isService} onChange={(event) => { setIsService(event.target.checked); if (event.target.checked) setVariants((previous) => previous.map((variant) => ({ ...variant, tracksInventory: false }))); }} />{t`This is a service with no physical inventory`}</label>
+    <fieldset><legend>{t`Product options`}</legend><LessBusyDescription>{t`A simple product needs no options. Add attributes such as size, storage, finish or service tier when buyers can choose between different versions.`}</LessBusyDescription>
+    {attributeDefinitions.map((definition) => <div key={definition.key} data-row><label>{t`Attribute name`}<input required maxLength={80} value={definition.name} onChange={(event) => setAttributeDefinitions((previous) => previous.map((item) => item.key === definition.key ? { ...item, name: event.target.value } : item))} /></label><label>{t`Allowed values, separated by commas`}<input required value={definition.values} onChange={(event) => setAttributeDefinitions((previous) => previous.map((item) => item.key === definition.key ? { ...item, values: event.target.value } : item))} /></label><LessBusyRetry type="button" onClick={() => { setAttributeDefinitions((previous) => previous.filter((item) => item.key !== definition.key)); setConfirmed(false); }}>{t`Remove attribute`}</LessBusyRetry></div>)}
+    {attributeDefinitions.length < 20 && <LessBusyRetry type="button" onClick={() => { setAttributeDefinitions((previous) => [...previous, { key: crypto.randomUUID(), name: '', values: '' }]); setConfirmed(false); }}>{t`Add attribute`}</LessBusyRetry>}</fieldset>
+    <details><summary>{t`Product images`}</summary><LessBusyDescription>{t`Use HTTPS image addresses, one per line. You can add up to twelve images.`}</LessBusyDescription><label>{t`Image addresses`}<textarea rows={3} value={images} onChange={(event) => setImages(event.target.value)} /></label></details>
+    {variants.map((variant, index) => <fieldset key={variant.key}><legend>{t`Sellable option ${index + 1}`}</legend><div data-row><label>{t`SKU`}<input required maxLength={80} value={variant.sku} onChange={(event) => updateVariant(variant.key, { sku: event.target.value })} /></label><label>{t`Selling price`}<input required inputMode="decimal" value={variant.price} onChange={(event) => updateVariant(variant.key, { price: event.target.value })} /></label><label>{t`Cost price (optional)`}<input inputMode="decimal" value={variant.cost} onChange={(event) => updateVariant(variant.key, { cost: event.target.value })} /></label><label>{t`Tax %`}<input required inputMode="decimal" value={variant.tax} onChange={(event) => updateVariant(variant.key, { tax: event.target.value })} /></label></div><div data-row><label>{t`Low-stock threshold`}<input type="number" min={0} max={1000000000} step={1} required value={variant.threshold} onChange={(event) => updateVariant(variant.key, { threshold: event.target.value })} /></label><label>{t`Barcode (optional)`}<input maxLength={100} value={variant.barcode} onChange={(event) => updateVariant(variant.key, { barcode: event.target.value })} /></label><label>{t`Option status`}<select value={variant.status} onChange={(event) => updateVariant(variant.key, { status: event.target.value })}><option value="ACTIVE">{t`Active`}</option><option value="ARCHIVED">{t`Archived`}</option></select></label></div><label data-confirmation><input type="checkbox" disabled={isService} checked={variant.tracksInventory} onChange={(event) => updateVariant(variant.key, { tracksInventory: event.target.checked })} />{t`Track stock for this option`}</label>{attributeDefinitions.filter((definition) => definition.name.trim()).map((definition) => <label key={definition.key}>{definition.name}<select required value={variant.attributes[definition.name.trim()] ?? ''} onChange={(event) => updateVariant(variant.key, { attributes: { ...variant.attributes, [definition.name.trim()]: event.target.value } })}><option value="">{t`Choose a value`}</option>{definition.values.split(',').map((value) => value.trim()).filter(Boolean).map((value) => <option key={value} value={value}>{value}</option>)}</select></label>)}{!variant.id && variants.length > 1 && <LessBusyRetry type="button" onClick={() => { setVariants((previous) => previous.filter((item) => item.key !== variant.key)); setConfirmed(false); }}>{t`Remove unsaved option`}</LessBusyRetry>}</fieldset>)}
+    {variants.length < 100 && <LessBusyRetry type="button" onClick={() => { setVariants((previous) => [...previous, { ...newVariant(), tracksInventory: !isService }]); setConfirmed(false); }}>{t`Add another option`}</LessBusyRetry>}
+    <label data-confirmation onChange={(event) => event.stopPropagation()}><input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} />{t`I have reviewed the catalogue details and prices.`}</label>{(error || validation) && <p role="alert">{error || validation}</p>}<LessBusyActions><LessBusyRetry type="submit" disabled={pending || !confirmed}>{pending ? t`Saving…` : t`Save product`}</LessBusyRetry><LessBusyRetry type="button" onClick={onCancel}>{t`Back`}</LessBusyRetry></LessBusyActions>
+  </LessBusyForm>;
+};
+
+const ProductDetails = ({ id }: { id: string }) => {
+  const { request, pending, error } = useLessBusyApi();
+  const { canWrite } = useLessBusyObjectAccess('lbProduct');
+  const navigate = useNavigate();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [editing, setEditing] = useState(false);
+  const load = useCallback(async () => { try { setProduct(productSchema.parse(await request(`products/${id}`))); } catch { setProduct(null); } }, [request, id]);
+  useEffect(() => { void load(); }, [load]);
+  if (!product) return <LessBusySection>{pending ? <p role="status">{t`Loading product…`}</p> : <><p role="alert">{error || t`This product could not be loaded.`}</p><LessBusyRetry onClick={() => void load()}>{t`Reload product`}</LessBusyRetry></>}</LessBusySection>;
+  if (editing) return <LessBusySection><ProductEditor key={`${id}:${product.version}`} product={product} onSaved={async () => { setEditing(false); await load(); }} onCancel={() => setEditing(false)} /></LessBusySection>;
+  return <><LessBusySection><LessBusyLink to="/products">{t`All products`}</LessBusyLink><h1>{product.name}</h1><LessBusyDescription>{product.status} · {product.isService ? t`Service` : t`Product`}{product.category ? ` · ${product.category}` : ''}</LessBusyDescription><p>{product.description}</p><LessBusyActions>{canWrite && <LessBusyRetry onClick={() => setEditing(true)}>{t`Edit catalogue details`}</LessBusyRetry>}<LessBusyLink to={`/object/lbProduct/${id}`}>{t`Full record and activity`}</LessBusyLink><LessBusyRetry onClick={() => navigate('/business/inventory')}>{t`Open inventory`}</LessBusyRetry></LessBusyActions></LessBusySection><LessBusySection><h2>{t`Sellable options`}</h2><LessBusyTaskList>{product.variants.map((variant) => <li key={variant.id}><LessBusyLink to={`/object/lbProductVariant/${variant.id}`}>{variant.sku} · {Object.values(variant.attributes).join(' / ') || t`Standard option`}</LessBusyLink><LessBusyDescription>{formatLessBusyMoney(variant.unitAmountMinor, product.currency)} · {variant.status} · {variant.tracksInventory ? t`Stock tracked` : t`No physical stock`}</LessBusyDescription></li>)}</LessBusyTaskList></LessBusySection><LessBusySection><h2>{t`Images`}</h2><div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>{(product.images ?? []).map((image) => <img key={image.url} src={image.url} alt={image.alt} loading="lazy" referrerPolicy="no-referrer" style={{ width: 160, height: 160, objectFit: 'contain', borderRadius: 12 }} />)}</div></LessBusySection><LessBusySection><h2>{t`Catalogue history`}</h2><ul>{(product.auditEvents ?? []).map((entry, index) => <li key={index}>{entry.action.replaceAll('_', ' ')} · {new Date(entry.at).toLocaleString()}</li>)}</ul></LessBusySection></>;
+};
+
+const ProductDirectory = () => {
+  const { canWrite } = useLessBusyObjectAccess('lbProduct');
+  const [query, setQuery] = useState('');
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('ACTIVE');
+  const { records, loading, error, refetch, hasNextPage, fetchMoreRecords } = useFindManyRecords<ObjectRecord & { name: string; category: string | null; status: string | null; isService: boolean | null }>({ objectNameSingular: 'lbProduct', filter: { and: [...(search ? [{ name: { ilike: `%${escapeForIlike(search)}%` } }] : []), ...(status ? [{ status: { eq: status } }] : [])] }, limit: 25, orderBy: [{ name: 'AscNullsLast' }], recordGqlFields: { id: true, name: true, category: true, status: true, isService: true } });
+  return <><LessBusySection><h1>{t`What your business offers.`}</h1><LessBusyDescription>{t`Products, services and sellable options with clear prices and stock rules.`}</LessBusyDescription>{canWrite && <LessBusyActions><LessBusyLink to="/products/new">{t`Add product or service`}</LessBusyLink><LessBusyLink to="/products/import">{t`Import CSV`}</LessBusyLink></LessBusyActions>}<LessBusyLink to="/products/export">{t`Export catalogue`}</LessBusyLink></LessBusySection><LessBusySection><LessBusyForm onSubmit={(event) => { event.preventDefault(); setSearch(query.trim()); }}><div data-row><label>{t`Search products`}<input type="search" maxLength={200} value={query} onChange={(event) => setQuery(event.target.value)} /></label><label>{t`Status`}<select value={status} onChange={(event) => setStatus(event.target.value)}><option value="">{t`All`}</option><option value="ACTIVE">{t`Active`}</option><option value="DRAFT">{t`Draft`}</option><option value="ARCHIVED">{t`Archived`}</option></select></label></div><LessBusyRetry type="submit">{t`Search`}</LessBusyRetry></LessBusyForm></LessBusySection><LessBusySection>{loading && <p role="status">{t`Loading catalogue…`}</p>}{error ? <><p role="alert">{t`Could not load the catalogue.`}</p><LessBusyRetry onClick={() => void refetch()}>{t`Retry`}</LessBusyRetry></> : <><LessBusyTaskList>{records.map((product) => <li key={product.id}><LessBusyLink to={`/products/${product.id}`}>{product.name}</LessBusyLink><LessBusyDescription>{product.category} · {product.isService ? t`Service` : t`Product`} · {product.status}</LessBusyDescription></li>)}</LessBusyTaskList>{!loading && !records.length && <LessBusyDescription>{t`No products in this view. Choose All or add your first product or service.`}</LessBusyDescription>}{hasNextPage && <LessBusyRetry onClick={() => void fetchMoreRecords()}>{t`Load more`}</LessBusyRetry>}</>}</LessBusySection></>;
+};
+
+export const LessBusyProducts = () => {
+  const { productId } = useParams();
+  const workspace = useAtomStateValue(currentWorkspaceState);
+  const navigate = useNavigate();
+  const { canWrite } = useLessBusyObjectAccess('lbProduct');
+  return <PageCardLayout header={<PageCardHeader title={t`Products & services`} />}><LessBusyContent><LessBusyObjectGate objectName="lbProduct"><LessBusyObjectGate objectName="lbProductVariant">{productId === 'export' ? <LessBusySection><LessBusyCatalogueExport key={workspace?.id} /></LessBusySection> : productId === 'import' ? (canWrite ? <LessBusySection><LessBusyCatalogueImport key={workspace?.id} /></LessBusySection> : <LessBusyDescription>{t`Your role does not allow catalogue imports.`}</LessBusyDescription>) : productId === 'new' ? (canWrite ? <LessBusySection><LessBusyDefaultCurrency>{(defaultCurrency) => <ProductEditor defaultCurrency={defaultCurrency} key={workspace?.id} onSaved={async (id) => { navigate(`/products/${id}`); }} onCancel={() => navigate('/products')} />}</LessBusyDefaultCurrency></LessBusySection> : <LessBusyDescription>{t`Your role does not allow catalogue changes.`}</LessBusyDescription>) : productId ? <ProductDetails key={`${workspace?.id}:${productId}`} id={productId} /> : <ProductDirectory key={workspace?.id} />}</LessBusyObjectGate></LessBusyObjectGate></LessBusyContent></PageCardLayout>;
+};

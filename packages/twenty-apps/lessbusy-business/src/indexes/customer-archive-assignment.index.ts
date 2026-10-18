@@ -1,0 +1,3 @@
+import { defineIndex, STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS } from 'twenty-sdk/define';
+import { BUSINESS_IDENTIFIERS } from 'src/constants/universal-identifiers';
+export default defineIndex({ universalIdentifier: '66b65d81-be72-4eed-a64d-0da13ecb6c23', objectUniversalIdentifier: STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS.person.universalIdentifier, isUnique: false, fields: [{ universalIdentifier: 'de878b3e-e321-43e2-8be6-4dd6fe703923', fieldUniversalIdentifier: BUSINESS_IDENTIFIERS.customerFields.lbArchivedAt }, { universalIdentifier: 'ecb80757-e3c2-4ff1-b906-b7973c076892', fieldUniversalIdentifier: BUSINESS_IDENTIFIERS.customerFields.lbAssignedEmployee }] });

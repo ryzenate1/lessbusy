@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- LessBusy LB monogram: geometric strokes, renders identically in browsers and rsvg -->
+  <rect width="1024" height="1024" rx="224" fill="#2F5BF5"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="96" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M330 332 L330 692 L470 692"/>
+    <path d="M610 332 L610 692"/>
+    <path d="M610 332 H700 A90 90 0 0 1 700 512 H610"/>
+    <path d="M610 512 H712 A90 90 0 0 1 712 692 H610"/>
+  </g>
+</svg>

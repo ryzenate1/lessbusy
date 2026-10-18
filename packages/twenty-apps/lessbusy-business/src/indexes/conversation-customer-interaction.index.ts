@@ -1,0 +1,3 @@
+import { defineIndex } from 'twenty-sdk/define';
+import { BUSINESS_IDENTIFIERS } from 'src/constants/universal-identifiers';
+export default defineIndex({ universalIdentifier: '0d83016a-f747-4131-8f0f-ef92520c155f', objectUniversalIdentifier: BUSINESS_IDENTIFIERS.conversation.object, isUnique: false, fields: [{ universalIdentifier: 'c10a830f-bdde-4bc0-b136-58169b8c0267', fieldUniversalIdentifier: BUSINESS_IDENTIFIERS.conversation.fields.customerId }, { universalIdentifier: '06f8eadf-f605-4fa4-84ba-2f6a67db3558', fieldUniversalIdentifier: BUSINESS_IDENTIFIERS.conversation.fields.lastMessageAt }] });

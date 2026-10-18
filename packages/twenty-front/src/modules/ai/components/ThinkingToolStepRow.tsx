@@ -1,4 +1,7 @@
+import { LessBusyTaskProposalAction } from '@/lessbusy/components/LessBusyTaskProposalAction';
 import { styled } from '@linaria/react';
+import { LessBusyInvoiceProposalAction } from '@/lessbusy/components/LessBusyInvoiceProposalAction';
+import { LessBusyNavigationAction } from '@/lessbusy/components/LessBusyNavigationAction';
 import { t } from '@lingui/core/macro';
 import { isNonEmptyString } from '@sniptt/guards';
 import { getToolName, type DynamicToolUIPart, type ToolUIPart } from 'ai';
@@ -231,6 +234,9 @@ export const ThinkingToolStepRow = ({
         </StyledRowLabelContainer>
       </StyledToolRowButton>
 
+      {toolName === 'lessbusy_prepare_task' && part.state === 'output-available' && <LessBusyTaskProposalAction output={part.output} />}
+      {toolName === 'lessbusy_prepare_invoice' && part.state === 'output-available' && <LessBusyInvoiceProposalAction output={part.output} />}
+      {toolName === 'lessbusy_find_destination' && part.state === 'output-available' && <LessBusyNavigationAction output={part.output} />}
       {isExpandable && (
         <Collapsible.Root open={isExpanded}>
           <Collapsible.Panel>

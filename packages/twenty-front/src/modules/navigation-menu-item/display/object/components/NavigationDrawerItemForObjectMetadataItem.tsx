@@ -1,4 +1,7 @@
 import { t } from '@lingui/core/macro';
+import { useLessBusyEnabledModules } from '@/lessbusy/hooks/useLessBusyEnabledModules';
+import { LESSBUSY_WORKFLOW_OBJECTS } from '@/lessbusy/utils/getLessBusyDestinations';
+import { getLessBusyObjectPresentation } from '@/lessbusy/utils/getLessBusyObjectPresentation';
 import { isNonEmptyString } from '@sniptt/guards';
 import { Fragment, type ReactNode } from 'react';
 
@@ -52,6 +55,7 @@ export const NavigationDrawerItemForObjectMetadataItem = ({
   isDragging = false,
   rightOptions,
 }: NavigationDrawerItemForObjectMetadataItemProps) => {
+  const enabledModules = useLessBusyEnabledModules();
   const isLayoutCustomizationModeEnabled = useAtomStateValue(
     isLayoutCustomizationModeEnabledState,
   );
@@ -118,7 +122,7 @@ export const NavigationDrawerItemForObjectMetadataItem = ({
   const primaryLabel =
     isRecord || isViewWithResolvedView
       ? itemLabel
-      : objectMetadataItem.labelPlural;
+      : getLessBusyObjectPresentation(objectMetadataItem).plural;
 
   const needsInaccessibleRecordPlaceholder =
     isLayoutCustomizationModeEnabled &&
@@ -176,6 +180,8 @@ export const NavigationDrawerItemForObjectMetadataItem = ({
 
   const showInaccessibleLock =
     isLayoutCustomizationModeEnabled && !canReadObjectRecords;
+
+  if (!isLayoutCustomizationModeEnabled && enabledModules && objectMetadataItem.nameSingular !== 'lbBusinessProfile' && (LESSBUSY_WORKFLOW_OBJECTS as readonly string[]).includes(objectMetadataItem.nameSingular) && !enabledModules.includes(objectMetadataItem.nameSingular)) return null;
 
   return (
     <NavigationDrawerItem

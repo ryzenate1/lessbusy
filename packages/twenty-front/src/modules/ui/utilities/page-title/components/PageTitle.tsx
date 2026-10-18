@@ -1,5 +1,6 @@
 import { Helmet } from '@dr.pogodin/react-helmet';
 
+import { APP_NAME } from '~/config/branding';
 import { useWorkspaceSurface } from '@/ui/layout/hooks/useWorkspaceSurface';
 
 type PageTitleProps = {
@@ -13,9 +14,13 @@ export const PageTitle = (props: PageTitleProps) => {
     return null;
   }
 
+  const hasAppName = props.title.includes(APP_NAME);
+
   return (
     <Helmet>
-      <title>{props.title}</title>
+      <title>
+        {hasAppName ? props.title : `${props.title} | ${APP_NAME}`}
+      </title>
     </Helmet>
   );
 };

@@ -1,3 +1,4 @@
+import { getBusinessPageContext } from 'src/modules/lessbusy/utils/get-business-page-context.util';
 import { Injectable, Logger } from '@nestjs/common';
 
 import { convertToModelMessages, hasToolCall } from 'ai';
@@ -462,6 +463,8 @@ export class ChatExecutionService {
         );
       case 'listView':
         return this.buildListViewContext(browsingContext);
+      case 'businessPage':
+        return getBusinessPageContext(browsingContext.page);
       case 'settingsPage':
         return this.buildSettingsPageContext(workspace, browsingContext.path);
       default:

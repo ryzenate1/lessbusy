@@ -12,7 +12,7 @@ export const baseSchema = (
   return {
     openapi: '3.1.1',
     info: {
-      title: 'Twenty Api',
+      title: 'LessBusy API',
       description: `Use this page to explore and call the **REST API**.
 
 ## Authentication
@@ -122,13 +122,13 @@ hand the file to your tool — never paste a tokenized URL into a chat:
 
 \`\`\`bash
 curl -H 'Authorization: Bearer <token>' \\
-  ${serverUrl}/${ApiPath.Rest}/open-api/${schemaName} > twenty-${schemaName}.json
+  ${serverUrl}/${ApiPath.Rest}/open-api/${schemaName} > lessbusy-${schemaName}.json
 \`\`\`
 `,
       termsOfService:
         'https://github.com/twentyhq/twenty?tab=coc-ov-file#readme',
       contact: {
-        email: 'felix@twenty.com',
+        name: 'LessBusy',
       },
       license: {
         name: 'AGPL-3.0',

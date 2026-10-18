@@ -227,6 +227,17 @@ export class SdkProviderFactoryService {
       name: config.name ?? 'openai-compatible',
       baseURL: config.baseUrl,
       ...(config.apiKey && { apiKey: config.apiKey }),
+      ...(config.requestTimeoutMs && {
+        fetch: (input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
+          const timeout = AbortSignal.timeout(config.requestTimeoutMs!);
+          return fetch(input, {
+            ...init,
+            signal: init?.signal
+              ? AbortSignal.any([init.signal, timeout])
+              : timeout,
+          });
+        },
+      }),
     });
 
     return this.toProviderInstance(

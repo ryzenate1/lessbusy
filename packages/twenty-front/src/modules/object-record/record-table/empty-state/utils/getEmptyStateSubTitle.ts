@@ -13,5 +13,17 @@ export const getEmptyStateSubTitle = (
     return t`Run a workflow and return here to view its executions`;
   }
 
-  return t`Use our API or add your first ${objectLabel} manually`;
+  if (objectNameSingular === 'person') {
+    return t`Add your first customer to keep their details, notes and follow-ups in one place.`;
+  }
+  if (objectNameSingular === 'opportunity') {
+    return t`Add a deal to track an interested buyer and plan the next step.`;
+  }
+  if (objectNameSingular === 'task') {
+    return t`Add a task, choose who owns it and set a due date.`;
+  }
+  if (objectNameSingular === 'note') {
+    return t`Save a note and connect it to the customer, company or deal it belongs to.`;
+  }
+  return t`Add your first ${objectLabel} to get started.`;
 };

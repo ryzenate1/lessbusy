@@ -14,6 +14,11 @@ export type BrowsingContextType =
       filterDescriptions: string[];
     }
   | {
+      type: 'businessPage';
+      page: string;
+      objectNameSingular?: string;
+    }
+  | {
       type: 'settingsPage';
       path: string;
     };

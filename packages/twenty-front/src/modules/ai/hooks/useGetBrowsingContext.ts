@@ -1,3 +1,5 @@
+import { getLessBusyBrowsingContext } from '@/lessbusy/utils/getLessBusyBrowsingContext';
+import { objectPermissionsByObjectMetadataIdSelector } from '@/object-metadata/states/objectPermissionsByObjectMetadataIdSelector';
 import { t } from '@lingui/core/macro';
 import { useCallback } from 'react';
 import { CoreObjectNameSingular } from 'twenty-shared/types';
@@ -28,6 +30,8 @@ export const useGetBrowsingContext = () => {
 
   const getBrowsingContext = useCallback((): BrowsingContext | null => {
     const { pathname } = window.location;
+    const lessBusyContext = getLessBusyBrowsingContext({ pathname, objects: store.get(objectMetadataItemsSelector.atom), permissions: store.get(objectPermissionsByObjectMetadataIdSelector.atom) });
+    if (lessBusyContext !== undefined) return lessBusyContext;
 
     if (isSettingsPath(pathname)) {
       return { type: 'settingsPage', path: pathname };

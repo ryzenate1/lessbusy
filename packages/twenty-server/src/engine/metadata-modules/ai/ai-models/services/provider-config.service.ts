@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { getLessBusyOpenRouterProvider } from 'src/engine/metadata-modules/ai/ai-models/utils/get-lessbusy-openrouter-provider.util';
 
 import { type ConfigVariables } from 'src/engine/core-modules/twenty-config/config-variables';
 import { TwentyConfigService } from 'src/engine/core-modules/twenty-config/twenty-config.service';
@@ -18,7 +19,10 @@ export class ProviderConfigService {
 
   getCatalogProviderNames(): Set<string> {
     return new Set(
-      Object.keys(this.defaultAiCatalogService.getDefaultAiCatalog()),
+      [
+        ...Object.keys(this.defaultAiCatalogService.getDefaultAiCatalog()),
+        ...Object.keys(getLessBusyOpenRouterProvider(this.twentyConfigService)),
+      ],
     );
   }
 
@@ -27,7 +31,10 @@ export class ProviderConfigService {
   }: { includeCustomProviders?: boolean } = {}): AiProvidersConfig {
     const rawCatalog = this.defaultAiCatalogService.getDefaultAiCatalog();
     // never resolve {{VAR}} templates in custom providers, to prevent config variable exfiltration
-    const catalog = this.resolveTemplates(rawCatalog);
+    const catalog = {
+      ...this.resolveTemplates(rawCatalog),
+      ...getLessBusyOpenRouterProvider(this.twentyConfigService),
+    };
 
     // dropping custom entries, rather than filtering the merged map, also restores catalog providers a same-named custom entry shadowed
     if (!includeCustomProviders) {

@@ -1,8 +1,10 @@
+import { type ConfigVariableValue } from 'twenty-shared/types';
 import { Logger } from '@nestjs/common';
 
-import { plainToClass } from 'class-transformer';
+import { plainToClass, Type } from 'class-transformer';
 import {
   IsDateString,
+  IsBoolean,
   IsDefined,
   IsEnum,
   IsIn,
@@ -12,6 +14,7 @@ import {
   IsString,
   IsUrl,
   Max,
+  Min,
   ValidateIf,
   type ValidationError,
   validateSync,
@@ -517,7 +520,7 @@ export class ConfigVariables {
     description: 'Name used in the From header for outgoing emails',
     type: ConfigVariableType.STRING,
   })
-  EMAIL_FROM_NAME = 'Felix from Twenty';
+  EMAIL_FROM_NAME = 'LessBusy';
 
   @ConfigVariablesMetadata({
     group: ConfigVariablesGroup.EMAIL_SETTINGS,
@@ -2077,6 +2080,57 @@ export class ConfigVariables {
   })
   @IsOptional()
   AI_PROVIDERS: AiProvidersConfig = {};
+
+  @ConfigVariablesMetadata({ group: ConfigVariablesGroup.LLM, type: ConfigVariableType.BOOLEAN, description: 'Enable the LessBusy OpenRouter provider' })
+  @IsBoolean()
+  LESSBUSY_AI_ENABLED = false;
+
+  @ConfigVariablesMetadata({ group: ConfigVariablesGroup.LLM, type: ConfigVariableType.BOOLEAN, description: 'Allow bounded LessBusy reservation-expiry sweeps; register the cron after installing the business application' })
+  @IsBoolean()
+  LESSBUSY_STOCK_EXPIRY_ENABLED = false;
+
+  @ConfigVariablesMetadata({ group: ConfigVariablesGroup.LLM, type: ConfigVariableType.ARRAY, isSensitive: true, isEnvOnly: true, description: 'LessBusy Chatwoot bindings: id, workspaceId, applicationId, baseUrl, accountId, inboxIds, apiToken, webhookSecret, enabled' })
+  @IsOptional()
+  LESSBUSY_CHATWOOT_CONNECTIONS: ConfigVariableValue = [];
+
+
+  @ConfigVariablesMetadata({ group: ConfigVariablesGroup.LLM, type: ConfigVariableType.STRING, isSensitive: true, description: 'Server-side OpenRouter API key' })
+  @IsOptional()
+  OPENROUTER_API_KEY?: string;
+
+  @ConfigVariablesMetadata({ group: ConfigVariablesGroup.LLM, type: ConfigVariableType.STRING, description: 'OpenRouter HTTPS API base URL' })
+  @IsUrl({ require_protocol: true })
+  OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
+
+  @ConfigVariablesMetadata({ group: ConfigVariablesGroup.LLM, type: ConfigVariableType.STRING, description: 'OpenRouter model identifier; no default model is assumed' })
+  @IsOptional()
+  OPENROUTER_MODEL?: string;
+
+  @ConfigVariablesMetadata({ group: ConfigVariablesGroup.LLM, type: ConfigVariableType.NUMBER, description: 'Maximum output tokens for the LessBusy OpenRouter model' })
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(32000)
+  LESSBUSY_AI_MAX_OUTPUT_TOKENS = 1500;
+
+  @ConfigVariablesMetadata({ group: ConfigVariablesGroup.LLM, type: ConfigVariableType.NUMBER, description: 'OpenRouter request timeout in milliseconds' })
+  @Type(() => Number)
+  @IsInt()
+  @Min(1000)
+  @Max(120000)
+  LESSBUSY_AI_REQUEST_TIMEOUT_MS = 30000;
+
+  @ConfigVariablesMetadata({ group: ConfigVariablesGroup.LLM, type: ConfigVariableType.NUMBER, description: 'Configured OpenRouter input price per million tokens; omit when unknown' })
+  @IsOptional()
+  @Type(() => Number)
+  @Min(0)
+  OPENROUTER_INPUT_COST_PER_MILLION_TOKENS?: number;
+
+  @ConfigVariablesMetadata({ group: ConfigVariablesGroup.LLM, type: ConfigVariableType.NUMBER, description: 'Configured OpenRouter output price per million tokens; omit when unknown' })
+  @IsOptional()
+  @Type(() => Number)
+  @Min(0)
+  OPENROUTER_OUTPUT_COST_PER_MILLION_TOKENS?: number;
 
   @ConfigVariablesMetadata({
     group: ConfigVariablesGroup.LLM,

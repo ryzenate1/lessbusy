@@ -12,6 +12,7 @@ export const aiProviderConfigSchema = z.object({
   authType: aiProviderAuthTypeSchema.optional(),
   apiKey: z.string().optional(),
   baseUrl: z.string().optional(),
+  requestTimeoutMs: z.number().int().min(1000).max(120000).optional(),
   region: z.string().optional(),
   dataResidency: z.enum(DATA_RESIDENCY_KEYS).optional(),
   accessKeyId: z.string().optional(),

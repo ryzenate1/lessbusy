@@ -1,4 +1,17 @@
+import { LessBusyDealDetailsTool } from 'src/engine/core-modules/tool-provider/tools/lessbusy-deal-details.tool';
+import { LessBusySearchBusinessTool } from 'src/engine/core-modules/tool-provider/tools/lessbusy-search-business.tool';
+import { LessBusyProductDetailsTool } from 'src/engine/core-modules/tool-provider/tools/lessbusy-product-details.tool';
+import { LessBusyCheckStockTool } from 'src/engine/core-modules/tool-provider/tools/lessbusy-check-stock.tool';
+import { LessBusyCustomerSummaryTool } from 'src/engine/core-modules/tool-provider/tools/lessbusy-customer-summary.tool';
+import { LessBusyMyTasksTool } from 'src/engine/core-modules/tool-provider/tools/lessbusy-my-tasks.tool';
+import { LessBusyPrepareTaskTool } from 'src/engine/core-modules/tool-provider/tools/lessbusy-prepare-task.tool';
+import { LessBusyOverdueInvoicesTool } from 'src/engine/core-modules/tool-provider/tools/lessbusy-overdue-invoices.tool';
 import { Module } from '@nestjs/common';
+import { LessBusyLowStockTool } from 'src/engine/core-modules/tool-provider/tools/lessbusy-low-stock.tool';
+import { LessBusyInventoryService } from 'src/modules/lessbusy/services/lessbusy-inventory.service';
+import { LessBusyPrepareInvoiceTool } from 'src/engine/core-modules/tool-provider/tools/lessbusy-prepare-invoice.tool';
+import { LessBusyFindDestinationTool } from 'src/engine/core-modules/tool-provider/tools/lessbusy-find-destination.tool';
+import { LessBusyHotLeadsTool } from 'src/engine/core-modules/tool-provider/tools/lessbusy-hot-leads.tool';
 import { DiscoveryModule } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -75,6 +88,20 @@ import { ToolRegistryService } from './services/tool-registry.service';
     TypeOrmModule.forFeature([UserEntity, FileEntity]),
   ],
   providers: [
+    LessBusyDealDetailsTool,
+    LessBusySearchBusinessTool,
+    LessBusyProductDetailsTool,
+    LessBusyCheckStockTool,
+
+    LessBusyCustomerSummaryTool,
+    LessBusyMyTasksTool,
+    LessBusyPrepareTaskTool,
+    LessBusyOverdueInvoicesTool,
+    LessBusyInventoryService,
+    LessBusyLowStockTool,
+    LessBusyPrepareInvoiceTool,
+    LessBusyFindDestinationTool,
+    LessBusyHotLeadsTool,
     ToolIndexResolver,
     DefinedToolRegistryService,
     ToolExecutorService,

@@ -1,0 +1,3 @@
+import { definePageLayout, PageLayoutTabLayoutMode } from 'twenty-sdk/define';
+import { BUSINESS_IDENTIFIERS } from 'src/constants/universal-identifiers';
+export default definePageLayout({ universalIdentifier: BUSINESS_IDENTIFIERS.payment.layout, name: "Payment details", type: 'RECORD_PAGE', objectUniversalIdentifier: BUSINESS_IDENTIFIERS.payment.object, tabs: [{ universalIdentifier: BUSINESS_IDENTIFIERS.payment.tab, title: 'Details', position: 0, layoutMode: PageLayoutTabLayoutMode.VERTICAL_LIST, widgets: [{ universalIdentifier: BUSINESS_IDENTIFIERS.payment.widget, title: 'Details', type: 'FIELDS', configuration: { configurationType: 'FIELDS' } }] }] });

@@ -1,3 +1,6 @@
+import { useLocation } from 'react-router-dom';
+import { getLessBusyBrowsingContext } from '@/lessbusy/utils/getLessBusyBrowsingContext';
+import { objectPermissionsByObjectMetadataIdSelector } from '@/object-metadata/states/objectPermissionsByObjectMetadataIdSelector';
 import { CoreObjectNameSingular } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 
@@ -42,6 +45,14 @@ export const useAiChatSuggestedPromptsContext =
     );
 
     const objectMetadataItems = useAtomStateValue(objectMetadataItemsSelector);
+    const permissions = useAtomStateValue(objectPermissionsByObjectMetadataIdSelector);
+    const { pathname } = useLocation();
+    const lessBusyContext = getLessBusyBrowsingContext({ pathname, objects: objectMetadataItems, permissions });
+    if (lessBusyContext !== undefined) {
+      if (!lessBusyContext) return null;
+      if (lessBusyContext.type === 'businessPage') return { browsingContextType: 'businessPage', objectNameSingular: lessBusyContext.objectNameSingular ?? '', businessPage: lessBusyContext.page };
+      if (lessBusyContext.type === 'recordPage') return { browsingContextType: 'recordPage', objectNameSingular: lessBusyContext.objectNameSingular };
+    }
 
     const objectMetadataItem = objectMetadataItems.find(
       (item) => item.id === contextStoreCurrentObjectMetadataItemId,

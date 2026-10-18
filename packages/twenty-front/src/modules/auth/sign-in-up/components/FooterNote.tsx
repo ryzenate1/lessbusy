@@ -1,8 +1,9 @@
 import { styled } from '@linaria/react';
 import { Trans, useLingui } from '@lingui/react/macro';
+import type { ReactNode } from 'react';
 
 import { useWorkspaceBypass } from '@/auth/sign-in-up/hooks/useWorkspaceBypass';
-import { getTwentyWebsiteUrl } from '@/auth/utils/getTwentyWebsiteUrl';
+import { getAppWebsiteUrl, type LegalPage } from '@/auth/utils/getAppWebsiteUrl';
 import { useIsCurrentLocationOnAWorkspace } from '@/domain-manager/hooks/useIsCurrentLocationOnAWorkspace';
 import { ONBOARDING_CONTENT_BLOCK_WIDTH } from '@/onboarding/constants/OnboardingContentBlockWidth';
 import { themeCssVariables } from 'twenty-ui/theme';
@@ -57,6 +58,18 @@ const StyledSeparator = styled.span`
   color: ${themeCssVariables.font.color.tertiary};
 `;
 
+const renderLegalLink = (page: LegalPage, node: ReactNode) => {
+  const url = getAppWebsiteUrl(page);
+
+  return url ? (
+    <a href={url} target="_blank" rel="noopener noreferrer">
+      {node}
+    </a>
+  ) : (
+    node
+  );
+};
+
 type FooterNoteProps = {
   secondaryAgreement?: 'privacyPolicy' | 'dataProcessingAgreement';
 };
@@ -73,32 +86,21 @@ export const FooterNote = ({
   if (!isOnAWorkspace) {
     return (
       <StyledCopyContainer>
-        <Trans>By using Twenty, you agree to the</Trans>{' '}
-        <a
-          href={getTwentyWebsiteUrl(i18n.locale, 'terms')}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Trans>Terms of Service</Trans>
-        </a>{' '}
+        <Trans>By using LessBusy, you agree to the</Trans>{' '}
+        {renderLegalLink(
+          'terms',
+          <Trans>Terms of Service</Trans>,
+        )}{' '}
         <Trans>and</Trans>{' '}
-        {secondaryAgreement === 'dataProcessingAgreement' ? (
-          <a
-            href="https://twenty.com/legal/dpa"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Trans>Data Processing Agreement</Trans>
-          </a>
-        ) : (
-          <a
-            href={getTwentyWebsiteUrl(i18n.locale, 'privacy-policy')}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Trans>Privacy Policy</Trans>
-          </a>
-        )}
+        {secondaryAgreement === 'dataProcessingAgreement'
+          ? renderLegalLink(
+              'dpa',
+              <Trans>Data Processing Agreement</Trans>,
+            )
+          : renderLegalLink(
+              'privacy-policy',
+              <Trans>Privacy Policy</Trans>,
+            )}
         .
       </StyledCopyContainer>
     );
@@ -114,21 +116,15 @@ export const FooterNote = ({
           <StyledSeparator>•</StyledSeparator>
         </>
       )}
-      <a
-        href={getTwentyWebsiteUrl(i18n.locale, 'privacy-policy')}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <Trans>Privacy Policy</Trans>
-      </a>
+      {renderLegalLink(
+        'privacy-policy',
+        <Trans>Privacy Policy</Trans>,
+      )}
       <StyledSeparator>•</StyledSeparator>
-      <a
-        href={getTwentyWebsiteUrl(i18n.locale, 'terms')}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <Trans>Terms of Service</Trans>
-      </a>
+      {renderLegalLink(
+        'terms',
+        <Trans>Terms of Service</Trans>,
+      )}
     </StyledLinksContainer>
   );
 };

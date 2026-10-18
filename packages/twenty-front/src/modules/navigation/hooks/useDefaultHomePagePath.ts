@@ -1,4 +1,5 @@
 import { currentUserState } from '@/auth/states/currentUserState';
+import { LESSBUSY_OVERVIEW_PATH } from '@/lessbusy/utils/getLessBusyDestinations';
 import { metadataStoreState } from '@/metadata-store/states/metadataStoreState';
 import { metadataStoreStatusFamilySelector } from '@/metadata-store/states/metadataStoreStatusFamilySelector';
 import { useNavigationMenuItemSectionItems } from '@/navigation-menu-item/display/hooks/useNavigationMenuItemSectionItems';
@@ -17,7 +18,7 @@ import { viewsSelector } from '@/views/states/selectors/viewsSelector';
 import isEmpty from 'lodash.isempty';
 import { useCallback, useMemo } from 'react';
 import { AppPath, SettingsPath } from 'twenty-shared/types';
-import { getAppPath, getSettingsPath, isDefined } from 'twenty-shared/utils';
+import { getSettingsPath, isDefined } from 'twenty-shared/utils';
 
 export const useDefaultHomePagePath = () => {
   const currentUser = useAtomStateValue(currentUserState);
@@ -112,20 +113,16 @@ export const useDefaultHomePagePath = () => {
     }
 
     if (isDefined(firstNavigationMenuItemLink)) {
-      return firstNavigationMenuItemLink;
+      return firstNavigationMenuItemLink.startsWith('/page/')
+        ? firstNavigationMenuItemLink
+        : LESSBUSY_OVERVIEW_PATH;
     }
 
     if (!isDefined(firstObjectPathInfo)) {
       return AppPath.NotFound;
     }
 
-    return getAppPath(
-      AppPath.RecordIndexPage,
-      { objectNamePlural: firstObjectPathInfo.objectMetadataItem?.namePlural },
-      isDefined(firstObjectPathInfo.viewId)
-        ? { viewId: firstObjectPathInfo.viewId }
-        : undefined,
-    );
+    return LESSBUSY_OVERVIEW_PATH;
   }, [
     currentUser,
     isMobile,

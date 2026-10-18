@@ -1,4 +1,6 @@
 import { RecordIndexContextProvider } from '@/object-record/record-index/contexts/RecordIndexContext';
+import { LessBusyRecordIntroduction } from '@/lessbusy/components/LessBusyRecordIntroduction';
+import { getLessBusyObjectPresentation } from '@/lessbusy/utils/getLessBusyObjectPresentation';
 
 import { getCommandMenuIdFromRecordIndexId } from '@/command-menu-item/utils/getCommandMenuIdFromRecordIndexId';
 import { CommandMenuComponentInstanceContext } from '@/command-menu/states/contexts/CommandMenuComponentInstanceContext';
@@ -107,10 +109,10 @@ export const RecordIndexContainerGater = memo(() => {
               instanceId: getCommandMenuIdFromRecordIndexId(recordIndexId),
             }}
           >
-            <PageTitle title={objectMetadataItem.labelPlural} />
+            <PageTitle title={getLessBusyObjectPresentation(objectMetadataItem).plural} />
             <PageCardLayout
               header={<RecordIndexPageHeader />}
-              secondaryBar={hasObjectReadPermissions && <RecordIndexViewBar />}
+              secondaryBar={hasObjectReadPermissions && <><LessBusyRecordIntroduction /><RecordIndexViewBar /></>}
             >
               {indexContent}
             </PageCardLayout>

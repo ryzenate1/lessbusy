@@ -1,3 +1,4 @@
+import { getLessBusySuggestedPrompts } from '@/lessbusy/utils/getLessBusySuggestedPrompts';
 import { isDefined } from 'twenty-shared/utils';
 
 import {
@@ -18,6 +19,8 @@ export const getAiChatSuggestedPrompts = (
 
   const { browsingContextType, objectNameSingular } =
     aiChatSuggestedPromptsContext;
+
+  if (browsingContextType === 'businessPage') return getLessBusySuggestedPrompts(aiChatSuggestedPromptsContext.businessPage ?? 'overview');
 
   if (browsingContextType === 'listView') {
     return LIST_VIEW_SUGGESTED_PROMPTS;

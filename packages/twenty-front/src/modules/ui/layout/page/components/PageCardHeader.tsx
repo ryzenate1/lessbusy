@@ -1,4 +1,5 @@
 import { APP_HEADER_HEIGHT } from '@/ui/layout/constants/AppHeaderHeight';
+import { LessBusyAssistantButton } from '@/lessbusy/components/LessBusyAssistantButton';
 import { useNavigationDrawerExpanded } from '@/ui/navigation/navigation-drawer/hooks/useNavigationDrawerExpanded';
 import { useWorkspaceSurface } from '@/ui/layout/hooks/useWorkspaceSurface';
 import { useWorkspaceSurfaceHeaderPortal } from '@/ui/layout/hooks/useWorkspaceSurfaceHeaderPortal';
@@ -174,6 +175,7 @@ export const PageCardHeader = ({
         data-click-outside-id={PAGE_ACTION_CONTAINER_CLICK_OUTSIDE_ID}
       >
         {actionButton}
+        <LessBusyAssistantButton />
       </StyledRight>
     </StyledHeader>
   );

@@ -92,7 +92,7 @@ export const SettingsAiModelsTab = () => {
           <SettingsOptionCardContentSwitch
             Icon={IconWand}
             title={t`Choose automatically`}
-            description={t`Twenty fills each level with the best model that meets your requirements`}
+            description={t`LessBusy fills each level with the best model that meets your requirements`}
             checked={isAutoModelSelectionEnabled}
             onChange={handleAutoModelSelectionToggle}
           />

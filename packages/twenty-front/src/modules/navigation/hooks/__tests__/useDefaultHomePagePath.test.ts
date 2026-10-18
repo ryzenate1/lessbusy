@@ -241,7 +241,7 @@ describe('useDefaultHomePagePath', () => {
       expect(result.current.defaultHomePagePath).toEqual(AppPath.SignInUp);
     });
   });
-  it('should redirect to the first object of the navigation menu', async () => {
+  it('opens the LessBusy overview instead of the first object', async () => {
     const { result } = renderHooks({
       withCurrentUser: true,
       withExistingView: false,
@@ -252,10 +252,10 @@ describe('useDefaultHomePagePath', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.defaultHomePagePath).toEqual('/objects/people');
+      expect(result.current.defaultHomePagePath).toEqual('/overview');
     });
   });
-  it('should honor display order over a lower-positioned item nested in a folder', async () => {
+  it('opens the overview when object shortcuts are nested in folders', async () => {
     const { result } = renderHooks({
       withCurrentUser: true,
       withExistingView: false,
@@ -267,7 +267,7 @@ describe('useDefaultHomePagePath', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.defaultHomePagePath).toEqual('/objects/people');
+      expect(result.current.defaultHomePagePath).toEqual('/overview');
     });
   });
   it('should redirect to a PAGE_LAYOUT navigation menu item as homepage', async () => {
@@ -284,7 +284,7 @@ describe('useDefaultHomePagePath', () => {
       expect(result.current.defaultHomePagePath).toEqual('/page/page-layout-1');
     });
   });
-  it('should skip a LINK navigation menu item and use the next valid item', async () => {
+  it('does not use external links as a homepage', async () => {
     const { result } = renderHooks({
       withCurrentUser: true,
       withExistingView: false,
@@ -295,10 +295,10 @@ describe('useDefaultHomePagePath', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.defaultHomePagePath).toEqual('/objects/people');
+      expect(result.current.defaultHomePagePath).toEqual('/overview');
     });
   });
-  it('should honor the view of a VIEW navigation menu item', async () => {
+  it('opens the overview while keeping saved views available in navigation', async () => {
     const { result } = renderHooks({
       withCurrentUser: true,
       withExistingView: true,
@@ -306,12 +306,10 @@ describe('useDefaultHomePagePath', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.defaultHomePagePath).toEqual(
-        '/objects/companies?viewId=viewId',
-      );
+      expect(result.current.defaultHomePagePath).toEqual('/overview');
     });
   });
-  it('should fall back to the first readable object when the menu has no object item', async () => {
+  it('opens the overview with an empty navigation menu', async () => {
     const { result } = renderHooks({
       withCurrentUser: true,
       withExistingView: false,
@@ -319,10 +317,10 @@ describe('useDefaultHomePagePath', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.defaultHomePagePath).toEqual('/objects/companies');
+      expect(result.current.defaultHomePagePath).toEqual('/overview');
     });
   });
-  it('should target the initial view rather than the index view when the menu has no object item', async () => {
+  it('opens the overview when several saved views exist', async () => {
     const { result } = renderHooks({
       withCurrentUser: true,
       withExistingView: false,
@@ -334,9 +332,7 @@ describe('useDefaultHomePagePath', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.defaultHomePagePath).toEqual(
-        '/objects/companies?viewId=initial-view-id',
-      );
+      expect(result.current.defaultHomePagePath).toEqual('/overview');
     });
   });
 

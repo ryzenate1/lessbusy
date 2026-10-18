@@ -1,4 +1,5 @@
 import { styled } from '@linaria/react';
+import { LessBusyAssistantButton } from '@/lessbusy/components/LessBusyAssistantButton';
 import { t } from '@lingui/core/macro';
 import { type ReactNode } from 'react';
 
@@ -143,6 +144,7 @@ export const PageHeader = ({
           data-click-outside-id={PAGE_ACTION_CONTAINER_CLICK_OUTSIDE_ID}
         >
           {children}
+          <LessBusyAssistantButton />
           {isMobile && <FrontComponentMediaSessionIndicator />}
         </StyledPageActionContainer>
       </StyledTopBarContainer>
