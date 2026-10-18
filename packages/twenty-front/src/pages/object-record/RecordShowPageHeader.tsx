@@ -1,5 +1,3 @@
-import { t } from '@lingui/core/macro';
-import { LessBusyLink } from '@/lessbusy/components/LessBusyStyles';
 import { getObjectMetadataIdentifierFields } from '@/object-metadata/utils/getObjectMetadataIdentifierFields';
 import { ObjectRecordShowPageBreadcrumb } from '@/object-record/record-show/components/ObjectRecordShowPageBreadcrumb';
 import { RecordIdentifierBarTitle } from '@/object-record/record-show/components/RecordIdentifierBarTitle';
@@ -40,18 +38,6 @@ const RecordShowPageMainHeader = ({
   const { labelIdentifierFieldMetadataItem } =
     getObjectMetadataIdentifierFields({ objectMetadataItem });
 
-  const actions = <>
-    {objectNameSingular === 'company' && <LessBusyLink to={`/companies/${objectRecordId}`}>{t`Company workspace`}</LessBusyLink>}
-    {objectNameSingular === 'lbStockBalance' && <LessBusyLink to={`/inventory/${objectRecordId}`}>{t`Manage stock`}</LessBusyLink>}
-    {objectNameSingular === 'lbProduct' && <LessBusyLink to={`/products/${objectRecordId}`}>{t`Manage product`}</LessBusyLink>}
-    {objectNameSingular === 'person' && <LessBusyLink to={`/customers/${objectRecordId}`}>{t`Customer workspace`}</LessBusyLink>}
-    {objectNameSingular === 'lbLead' && <LessBusyLink to={`/business/leads/${objectRecordId}`}>{t`Review lead`}</LessBusyLink>}
-    {objectNameSingular === 'lbInvoice' && <LessBusyLink to={`/business/invoices/${objectRecordId}`}>{t`Manage invoice`}</LessBusyLink>}
-    {objectNameSingular === 'lbQuotation' && <LessBusyLink to={`/business/quotations/${objectRecordId}`}>{t`Manage quotation`}</LessBusyLink>}
-    {objectNameSingular === 'lbSalesOrder' && <LessBusyLink to={`/business/orders/${objectRecordId}`}>{t`Manage order`}</LessBusyLink>}
-    {children}
-  </>;
-
   if (titleMode === 'record-title') {
     return (
       <PageCardHeader
@@ -65,7 +51,7 @@ const RecordShowPageMainHeader = ({
             {titleAccessory}
           </>
         }
-        actionButton={actions}
+        actionButton={children}
       />
     );
   }
@@ -80,7 +66,7 @@ const RecordShowPageMainHeader = ({
           labelIdentifierFieldMetadataItem={labelIdentifierFieldMetadataItem}
         />
       }
-      actionButton={actions}
+      actionButton={children}
     />
   );
 };

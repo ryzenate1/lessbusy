@@ -1,7 +1,4 @@
 import { FrontComponentMediaSessionIndicator } from '@/front-components/media-session/components/FrontComponentMediaSessionIndicator';
-import { APP_NAME } from '~/config/branding';
-import { LESSBUSY_OVERVIEW_PATH } from '@/lessbusy/utils/getLessBusyDestinations';
-import { Link } from 'react-router-dom';
 import { APP_HEADER_HEIGHT } from '@/ui/layout/constants/AppHeaderHeight';
 import { NAVIGATION_DRAWER_COLLAPSED_BUTTON_SIZE } from '@/ui/navigation/navigation-drawer/constants/NavigationDrawerCollapsedButtonSize';
 import { styled } from '@linaria/react';
@@ -19,23 +16,6 @@ import { NavigationDrawerCollapseButton } from '@/ui/navigation/navigation-drawe
 const StyledContainer = styled.div`
   flex-shrink: 0;
   user-select: none;
-`;
-
-const StyledBrand = styled(Link)`
-  align-items: center;
-  color: ${themeCssVariables.font.color.primary};
-  display: flex;
-  font-size: 16px;
-  font-weight: 600;
-  gap: 10px;
-  min-height: 44px;
-  padding: 8px 12px;
-  text-decoration: none;
-
-  &:focus-visible {
-    outline: 2px solid ${themeCssVariables.color.blue};
-    outline-offset: -2px;
-  }
 `;
 
 const StyledHeaderRow = styled.div`
@@ -125,15 +105,6 @@ export const NavigationDrawerHeader = () => {
 
   return (
     <StyledContainer>
-      <StyledBrand to={LESSBUSY_OVERVIEW_PATH} aria-label={APP_NAME}>
-        <img
-          src="/images/branding/lessbusy-default-workspace-logo.png"
-          alt=""
-          width={24}
-          height={24}
-        />
-        {isExpanded && APP_NAME}
-      </StyledBrand>
       <StyledHeaderRow>
         <StyledWorkspaceDropdownContainer>
           <MultiWorkspaceDropdownButton />
