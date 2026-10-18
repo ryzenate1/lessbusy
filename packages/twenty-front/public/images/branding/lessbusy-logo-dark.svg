@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 128">
+  <!-- LessBusy wordmark for dark backgrounds -->
+  <text x="28" y="98" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="96" font-weight="700" letter-spacing="-3">
+    <tspan fill="#FFFFFF">Less</tspan><tspan fill="#5B85FF">Busy</tspan>
+  </text>
+</svg>

@@ -1,0 +1,3 @@
+import { defineField, FieldType, RelationType, STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS } from 'twenty-sdk/define';
+import { BUSINESS_IDENTIFIERS } from 'src/constants/universal-identifiers';
+export default defineField({ universalIdentifier: BUSINESS_IDENTIFIERS.customerFields.lbAssignedCustomers, objectUniversalIdentifier: STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS.workspaceMember.universalIdentifier, type: FieldType.RELATION, name: 'lbAssignedCustomers', label: 'Assigned customers', relationTargetObjectMetadataUniversalIdentifier: STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS.person.universalIdentifier, relationTargetFieldMetadataUniversalIdentifier: BUSINESS_IDENTIFIERS.customerFields.lbAssignedEmployee, universalSettings: { relationType: RelationType.ONE_TO_MANY } });

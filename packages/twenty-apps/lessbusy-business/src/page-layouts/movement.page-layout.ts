@@ -1,0 +1,3 @@
+import { definePageLayout, PageLayoutTabLayoutMode } from 'twenty-sdk/define';
+import { BUSINESS_IDENTIFIERS } from 'src/constants/universal-identifiers';
+export default definePageLayout({ universalIdentifier: BUSINESS_IDENTIFIERS.movement.layout, name: "Stock movement details", type: 'RECORD_PAGE', objectUniversalIdentifier: BUSINESS_IDENTIFIERS.movement.object, tabs: [{ universalIdentifier: BUSINESS_IDENTIFIERS.movement.tab, title: 'Details', position: 0, layoutMode: PageLayoutTabLayoutMode.VERTICAL_LIST, widgets: [{ universalIdentifier: BUSINESS_IDENTIFIERS.movement.widget, title: 'Details', type: 'FIELDS', configuration: { configurationType: 'FIELDS' } }] }] });

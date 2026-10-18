@@ -1,0 +1,14 @@
+{
+  "name": "lessbusy-business",
+  "private": true,
+  "version": "0.1.0",
+  "license": "AGPL-3.0",
+  "description": "Workspace-owned LessBusy CRM and business objects",
+  "dependencies": {
+    "twenty-sdk": "file:../../twenty-sdk",
+    "twenty-shared": "file:../../twenty-shared"
+  },
+  "scripts": {
+    "twenty": "twenty"
+  }
+}

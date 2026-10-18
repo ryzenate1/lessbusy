@@ -1,0 +1,3 @@
+import { definePageLayout, PageLayoutTabLayoutMode } from 'twenty-sdk/define';
+import { BUSINESS_IDENTIFIERS } from 'src/constants/universal-identifiers';
+export default definePageLayout({ universalIdentifier: BUSINESS_IDENTIFIERS.quotation.layout, name: "Quotation details", type: 'RECORD_PAGE', objectUniversalIdentifier: BUSINESS_IDENTIFIERS.quotation.object, tabs: [{ universalIdentifier: BUSINESS_IDENTIFIERS.quotation.tab, title: 'Details', position: 0, layoutMode: PageLayoutTabLayoutMode.VERTICAL_LIST, widgets: [{ universalIdentifier: BUSINESS_IDENTIFIERS.quotation.widget, title: 'Details', type: 'FIELDS', configuration: { configurationType: 'FIELDS' } }] }] });

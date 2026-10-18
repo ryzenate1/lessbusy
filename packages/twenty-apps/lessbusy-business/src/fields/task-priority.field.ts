@@ -1,0 +1,3 @@
+import { defineField, FieldType, STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS } from 'twenty-sdk/define';
+import { BUSINESS_IDENTIFIERS } from 'src/constants/universal-identifiers';
+export default defineField({ universalIdentifier: BUSINESS_IDENTIFIERS.taskFields.lbPriority, objectUniversalIdentifier: STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS.task.universalIdentifier, name: 'lbPriority', label: 'Priority', type: FieldType.SELECT, isNullable: true, options: [{ value: 'LOW', label: 'Low', position: 0, color: 'blue' }, { value: 'NORMAL', label: 'Normal', position: 1, color: 'blue' }, { value: 'HIGH', label: 'High', position: 2, color: 'orange' }, { value: 'CRITICAL', label: 'Critical', position: 3, color: 'red' }] });

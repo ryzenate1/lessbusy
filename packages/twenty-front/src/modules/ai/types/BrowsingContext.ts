@@ -1,0 +1,24 @@
+export type BrowsingContext =
+  | {
+      type: 'recordPage';
+      objectNameSingular: string;
+      recordId: string;
+      pageLayoutId?: string;
+      activeTabId?: string | null;
+    }
+  | {
+      type: 'listView';
+      objectNameSingular: string;
+      viewId: string;
+      viewName: string;
+      filterDescriptions: string[];
+    }
+  | {
+      type: 'businessPage';
+      page: string;
+      objectNameSingular?: string;
+    }
+  | {
+      type: 'settingsPage';
+      path: string;
+    };
